@@ -1,10 +1,28 @@
-import { waitForElementToLoad } from "../util/waitforelement";
+/* returns a Promise that only resolves once the element is loaded */
+function waitForElementToLoad(elementId) {
+
+    const target = document.querySelector("body");
+    const config = { childList: true };
+
+    return new Promise((resolve) => {
+        const observer = new MutationObserver((mutationList, observer) => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                resolve();
+            }
+        });
+        observer.observe(target, config);
+    });
+}
+
 /* relevant element IDs */
 const TOOLBAR_ELEMENT_ID = ":m7";
 const MESSAGEBOX_ELEMENT_ID = ":nf";
 
 /* fill the email body with relevant text */
 chrome.runtime.onMessage.addListener( async (request, sender, sendResponse) => {
+    console.log(request);
+    console.log(sender);
     if (request.message === "autofill the email") {
 
         // once the email's toolbar loads, it's safe to inject the content

@@ -4,6 +4,7 @@ var tabLoadingTrap = { tabId: undefined, resolve: undefined };
 returns a Promise that only resolves once the tab is loaded
 */
 export function waitForTabToLoad(tab) {
+    console.log('function entered');
     tabLoadingTrap.tabId = tab.id;
 
     return new Promise((resolve) => {
@@ -13,6 +14,7 @@ export function waitForTabToLoad(tab) {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (tabId === tabLoadingTrap.tabId && changeInfo.status === 'complete') {
+        console.log('tab finished loading');
         tabLoadingTrap.resolve();
 
         tabLoadingTrap.tabId = undefined;

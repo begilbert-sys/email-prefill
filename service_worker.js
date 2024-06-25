@@ -1,5 +1,4 @@
 import { waitForTabToLoad } from './util/waitfortab.js';
-
 /*
 Returns a "tab" object representing the currently opened tab
 https://developer.chrome.com/docs/extensions/reference/api/tabs#type-Tab
@@ -39,7 +38,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, reply) => {
         const emailTab = await chrome.tabs.create({ "url": tabUrl });
 
         // the new page must be fully loaded, or else it won't receive the message 
-        await waitForTabToLoad(emailTab.id);
+        await waitForTabToLoad(emailTab);
+
 
         await chrome.tabs.sendMessage(emailTab.id, { message: "autofill the email", content: pageContents });
     }
