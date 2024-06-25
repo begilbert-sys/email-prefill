@@ -16,9 +16,9 @@ async function getCurrentTab() {
 /* 
 Asks the `content.js` script to return a string with the page's contents
 */
-async function getPageContents(tab) {
+async function getPageData(tab) {
     const response = await chrome.tabs.sendMessage(tab.id, { message: "get page contents" });
-    return response.pageContents;
+    return response;
 }
 
 /* 
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, reply) => {
     if (request.message === "start service worker") {
         const tab = await getCurrentTab();
 
-        const pageContents = await getPageContents(tab);
+        const pageData = await getPageData(tab);
 
         const tabUrl =
             "https://mail.google.com/mail/?view=cm&fs=1&tf=1"
@@ -40,8 +40,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, reply) => {
         // the new page must be fully loaded, or else it won't receive the message 
         await waitForTabToLoad(emailTab);
 
-
-        await chrome.tabs.sendMessage(emailTab.id, { message: "autofill the email", content: pageContents });
+        await chrome.tabs.sendMessage(emailTab.id, { 
+            message: "autofill the email", 
+            url: tab.url, 
+            content: pageData.content, 
+            title: pageData.title
+        });
     }
 });
 

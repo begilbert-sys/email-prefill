@@ -14,7 +14,6 @@ export function waitForTabToLoad(tab) {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (tabId === tabLoadingTrap.tabId && changeInfo.status === 'complete') {
-        console.log('tab finished loading');
         tabLoadingTrap.resolve();
 
         tabLoadingTrap.tabId = undefined;
