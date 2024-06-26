@@ -21,3 +21,4 @@ Both libraries are licensed under Apache 2.0, which I believe means it's okay to
 
 * Implement DOMPurify 
 * `<p>` elements won't display if they're inside of a `<li>` element
+* Figure out how to handle licensing 
