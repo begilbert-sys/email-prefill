@@ -16,3 +16,8 @@ So far, it works well on news sites / articles. I've just been testing it on ran
 
 Both libraries are licensed under Apache 2.0, which I believe means it's okay to use. 
 
+
+## Issues/To-Do List
+
+* Implement DOMPurify 
+* `<p>` elements won't display if they're inside of a `<li>` element
