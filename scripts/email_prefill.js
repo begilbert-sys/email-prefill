@@ -13,8 +13,11 @@ function pageFinishedLoading() {
         const observer = new MutationObserver((mutationList, observer) => {
             mutationList.forEach((mutationRecord) => {
                 if (mutationRecord.target.id === ":nf" && mutationRecord.removedNodes.length >  0) {
-                    resolve();
-                    observer.disconnect();
+                    // wait another 100 ms, just in case
+                    setTimeout(() => {
+                        resolve();
+                        observer.disconnect();
+                    }, 100);
                 }
             });
         });
@@ -25,9 +28,11 @@ function pageFinishedLoading() {
 
 function isValidElement(element) {
     const text = element.textContent.toLowerCase();
-    if (text.split(' ').length < 3 && (text.includes('advertisement') || text.includes('ad'))) {
+    const wordList = text.split(' ');
+    if (text.length < 1 || (wordList.length < 10 && (text.includes('advertisement') || text.includes('ad')))) {
+        console.log('eliminated ^');
         return false;
-    }
+    } 
     return true;
 }
 /* relevant element IDs */
@@ -50,7 +55,15 @@ chrome.runtime.onMessage.addListener( async (request, sender, sendResponse) => {
         figures.forEach((fig) => {
             fig.parentNode.removeChild(fig);
         });
+        const tables = parsedDoc.querySelectorAll('table');
+        tables.forEach((fig) => {
+            fig.parentNode.removeChild(fig);
+        });
 
+        const videos = parsedDoc.querySelectorAll('[attribute*="video"]');
+        videos.forEach((vid) => {
+            vid.parentNode.removeChild(vid);
+        });
         await pageFinishedLoading();
 
         let messageBody = document.querySelector(MESSAGEBOX_ELEMENT_ID);
@@ -67,14 +80,17 @@ chrome.runtime.onMessage.addListener( async (request, sender, sendResponse) => {
         messageBody.appendChild(aTitle)
 
         // we only really care about 'p' and 'h' elements
-        const elements = parsedDoc.querySelectorAll('p, h1, h2, h3, h4');
+        const elements = parsedDoc.querySelectorAll('p, h1, h2, h3, h4, ul, ol');
 
 
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
-            if (element.tagName === 'P' && !isValidElement(element)) {
-                continue;
-            } else {
+            console.log(element);
+            if (element.tagName === 'P') {
+                if (!isValidElement(element)) {
+                    continue;
+                }
+            } else if (element.tagName.startsWith('h')) {
                 // ignore 'h' elements that are not followed by a valid 'p' element
                 if ((i === elements.length - 1) || elements[i+1].tagName !== 'P') {
                     continue;
@@ -87,8 +103,25 @@ chrome.runtime.onMessage.addListener( async (request, sender, sendResponse) => {
 
 
 /*
-TODO:
+ISSUES:
 
-* remove links internal to the website 
+Videos are displayed:
+https://www.babycenter.com/baby/crying-colic/what-to-do-when-your-baby-cries-for-no-reason_10320516
+
+maybe remove classes with "video" in them? 
+
+Figure this one out:
+https://www.cnbc.com/2018/01/29/money-habits-of-self-made-billionaire-ikea-founder-ingvar-kamprad.html
+
+
+Fix HTML characters appearing in titles: 
+https://www.billboard.com/music/music-news/snoop-dogg-dionne-warwick-confronted-him-over-misogynistic-lyrics-1235193028/amp/
+
+
+Sanitize HTML before putting it in the email
+
+
+Ignore <p> if it is within a <li> 
+https://docs.python.org/3/library/asyncio.html
 
 */
